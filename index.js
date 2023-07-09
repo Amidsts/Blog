@@ -18,7 +18,7 @@
 
 const express = require("express")
 const mongoose = require("mongoose")
-const blogger = require("./model/blogger_mode")
+const {blogger} = require("./model/blogger_mode")
 
 const port = 8000
 
@@ -26,7 +26,10 @@ const app = express()
 
 async function connectDb () {
     try {
-        await mongoose.connect("mongodb://localhost:27017/Blog")
+        await mongoose.connect("mongodb://localhost:27017/Blog", {
+            useUnifiedTopology: true,
+            useNewUrlParser: true
+        })
 
         console.log("connected to the database successfully")
     } catch (error) {
@@ -37,11 +40,23 @@ async function connectDb () {
 connectDb()
 
 
-app.get("/greet", (req, res) => {
-    res.write("welcome")
-    res.write("hello world!")
+app.get("/greet", async (req, res) => {
+
+   try {
     
-    res.end()
+    const newBlogger = await new blogger({
+        userName: "Amidst",
+        password: "ggskyt335|ghs",
+        email: "amidst@gmail.com",
+        Tel: "09056789987"
+    }).save()
+
+    res.send(newBlogger)
+
+   } catch (error) {
+    console.log(error);
+        res.send(error)
+   }
 })
 
 app.listen(port, () => {

@@ -1,8 +1,8 @@
-const mongoose = "mongoose"
+const mongoose = require("mongoose")
 
 const schema = mongoose.Schema
 
-const bloggerschema = new schema({
+const bloggerschema = new mongoose.Schema({
     userName: {
         type: String,
         required: true
@@ -19,6 +19,8 @@ const bloggerschema = new schema({
         type: String,
         required: true
     }
-})
+}, {timestamps: true})
 
 const blogger = mongoose.model("blogger", bloggerschema)
+
+module.exports = {blogger}
