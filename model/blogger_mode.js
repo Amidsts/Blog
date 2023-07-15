@@ -18,7 +18,13 @@ const bloggerschema = new mongoose.Schema({
     Tel: {
         type: String,
         required: true
-    }
+    },
+    posts: [{
+        postId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "post"
+        }
+    }]
 }, {timestamps: true})
 
 const blogger = mongoose.model("blogger", bloggerschema)

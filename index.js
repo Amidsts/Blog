@@ -19,6 +19,7 @@
 const express = require("express")
 const mongoose = require("mongoose")
 const {blogger} = require("./model/blogger_mode")
+const {post} =require("./model/post_model")
 const bcrypt = require("bcrypt")
 
 const dotenv = require("dotenv")
@@ -28,11 +29,12 @@ const port = 8000
 const app = express()
 
 app.use(express.json())
+dotenv.config()
 
 async function connectDb () {
     try {
 
-        await mongoose.connect("mongodb://localhost:27017/Blog", {
+        await mongoose.connect(process.env.dbUri, {
             useUnifiedTopology: true,
             useNewUrlParser: true
         })
@@ -126,6 +128,25 @@ app.post("/sign_in", async(req, res) => {
 
     } catch (error) {
         
+        res.send(error)
+    }
+})
+
+app.post("/create_post", async (req, res) => {
+    try {
+        const newPost = await new post({
+            title: req.body.title,
+            description: req.body.description,
+            category: req.body.category,
+            content: req.body.content,
+            bloggerId: req.body.bloggerId
+        }).save()
+
+        res.send({
+            data: newPost
+        })
+    } catch (error) {
+        console.log(error);
         res.send(error)
     }
 })
