@@ -13,6 +13,8 @@
  * PATHS: 
  * relative path
  * absolute path
+ * MVC ==> model, views and controller
+ * routes folder
  */
 
 
@@ -20,7 +22,19 @@ const express = require("express")
 const mongoose = require("mongoose")
 const {blogger} = require("./model/blogger_mode")
 const {post} =require("./model/post_model")
+const {
+    createBloggerController,
+    signInBloggerController
+} = require("./controllers/blogger.controller")
+const {
+    createPostController,
+    getPost,
+    getPosts,
+    updatePost,
+    deletePost
+} = require("./controllers/post.controller")
 const bcrypt = require("bcrypt")
+
 
 const dotenv = require("dotenv")
 
@@ -48,108 +62,17 @@ async function connectDb () {
 connectDb()
 
 
-app.get("/greet", async (req, res) => {
-
-   try {
-    
-    const newBlogger = await new blogger({
-        userName: "Amidst",
-        password: "ggskyt335|ghs",
-        email: "amidst@gmail.com",
-        Tel: "09056789987"
-    }).save()
-
-    res.send(newBlogger)
-
-   } catch (error) {
-    console.log(error);
-        res.send(error)
-   }
-})
-
-app.post("/sign_up", async (req, res) => {
-
-    try {
-
-        const salt = bcrypt.genSaltSync(10)
-
-        const hashedPassword = bcrypt.hashSync(req.body.password, salt)
-
-        const data = {
-            userName: req.body.userName,
-            password: hashedPassword,
-            email: req.body.email,
-            Tel: req.body.Tel
-        }
-
-        const userExists = await blogger.findOne({email: data.email})
-
-        if (userExists) {
-            throw new Error("email already exists")
-        }
-
-        const newblogger = await new blogger(data).save()
-
-        res.send({
-            data: newblogger
-        })
-
-    } catch (error) {
-        console.log(error);
-        res.send(error)
-    }
-})
+//new blogger
+app.post("/sign_up", createBloggerController)
 
 
-app.post("/sign_in", async(req, res) => {
-    try {
-        const data =  {
-            email: req.body.email,
-            password: req.body.password
-        }
+app.post("/sign_in", signInBloggerController)
 
-        const bloggerExists = await blogger.findOne({
-            email: data.email
-        })
-
-        console.log(bloggerExists);
-
-        if (!bloggerExists) {
-            res.send("invalid credential")
-        }
-
-        const passwordSame = bcrypt.compareSync(data.password, bloggerExists.password)
-
-        if (!passwordSame) {
-            res.send("invalid credential")
-        }
-
-        res.send({message: "sign in successfully"})
-
-    } catch (error) {
-        
-        res.send(error)
-    }
-})
-
-app.post("/create_post", async (req, res) => {
-    try {
-        const newPost = await new post({
-            title: req.body.title,
-            description: req.body.description,
-            category: req.body.category,
-            content: req.body.content,
-            bloggerId: req.body.bloggerId
-        }).save()
-
-        res.send({
-            data: newPost
-        })
-    } catch (error) {
-        console.log(error);
-        res.send(error)
-    }
-})
+app.post("/create_post", createPostController)
+app.get("/post/:postId", getPost)
+app.get("/posts", getPosts)
+app.put("/update_post/:postId", updatePost)
+app.delete("/delete_post/:postId", deletePost)
 
 app.listen(port, () => {
     console.log(`server is running on port ${port}`);
